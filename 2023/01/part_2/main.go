@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	file, err := os.Open("2023/01/part_1/input.txt")
+	file, err := os.Open("2023/01/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func fix(line string) string {
 	line = strings.Replace(line, "three", "t3e", -1)
 	line = strings.Replace(line, "four", "f4r", -1)
 	line = strings.Replace(line, "five", "f5e", -1)
-	line = strings.Replace(line, "six", "s6i", -1)
+	line = strings.Replace(line, "six", "s6x", -1)
 	line = strings.Replace(line, "seven", "s7n", -1)
 	line = strings.Replace(line, "eight", "e8t", -1)
 	line = strings.Replace(line, "nine", "n9e", -1)
