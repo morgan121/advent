@@ -32,7 +32,7 @@ func main() {
 		max_blue := 0
 
 		for i := 0; i < len(game_results); i++ {
-			// add 0 to games where that colour did not get pulled out
+			// add 0 to draws where that colour did not get pulled out
 			red_n := extractNumbers(append(red_re.FindAllString(game_results[i], -1), "0")[0])
 			green_n := extractNumbers(append(green_re.FindAllString(game_results[i], -1), "0")[0])
 			blue_n := extractNumbers(append(blue_re.FindAllString(game_results[i], -1), "0")[0])
