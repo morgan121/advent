@@ -11,31 +11,28 @@ import (
 )
 
 func main() {
-	file, err := os.Open("2023/02/input.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
+	file := readFile("2023/02/input.txt")
 	defer file.Close()
+	scanner := bufio.NewScanner(file)
 
 	red_re := regexp.MustCompile(" [0-9]+ red")
 	green_re := regexp.MustCompile(" [0-9]+ green")
 	blue_re := regexp.MustCompile(" [0-9]+ blue")
-	scanner := bufio.NewScanner(file)
 	total := 0
 
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), ":")
-		game_results := strings.Split(line[1], ";")
+		draw_results := strings.Split(line[1], ";")
 
 		max_red := 0
 		max_green := 0
 		max_blue := 0
 
-		for i := 0; i < len(game_results); i++ {
+		for i := 0; i < len(draw_results); i++ {
 			// add 0 to draws where that colour did not get pulled out
-			red_n := extractNumbers(append(red_re.FindAllString(game_results[i], -1), "0")[0])
-			green_n := extractNumbers(append(green_re.FindAllString(game_results[i], -1), "0")[0])
-			blue_n := extractNumbers(append(blue_re.FindAllString(game_results[i], -1), "0")[0])
+			red_n := extractNumbers(append(red_re.FindAllString(draw_results[i], -1), "0")[0])
+			green_n := extractNumbers(append(green_re.FindAllString(draw_results[i], -1), "0")[0])
+			blue_n := extractNumbers(append(blue_re.FindAllString(draw_results[i], -1), "0")[0])
 
 			max_red = max(max_red, red_n)
 			max_green = max(max_green, green_n)
@@ -68,4 +65,13 @@ func max(x, y int) int {
 		return y
 	}
 	return x
+}
+
+func readFile(filepath string) *os.File {
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return file
 }
