@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -22,38 +23,20 @@ func main() {
 
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), ":")
-		game_index := extractNumbers(line[0])
-		draw_results := strings.Split(line[1], ";")
+		game_index := extractNumbers(line[0])[0]
 
-		valid_red := true
-		valid_green := true
-		valid_blue := true
+		all_red := extractNumberArray(red_re.FindAllString(line[1], -1))
+		all_green := extractNumberArray(green_re.FindAllString(line[1], -1))
+		all_blue := extractNumberArray(blue_re.FindAllString(line[1], -1))
+		sort.Ints(all_red)
+		sort.Ints(all_green)
+		sort.Ints(all_blue)
 
-		for i := 0; i < len(draw_results); i++ {
-			red_n := extractNumbers(append(red_re.FindAllString(draw_results[i], -1), "0")[0])
-			green_n := extractNumbers(append(green_re.FindAllString(draw_results[i], -1), "0")[0])
-			blue_n := extractNumbers(append(blue_re.FindAllString(draw_results[i], -1), "0")[0])
+		max_red := all_red[len(all_red)-1]
+		max_green := all_green[len(all_green)-1]
+		max_blue := all_blue[len(all_blue)-1]
 
-			if red_n <= 12 {
-				valid_red = valid_red && true
-			} else {
-				valid_red = false
-			}
-
-			if green_n <= 13 {
-				valid_green = valid_green && true
-			} else {
-				valid_green = false
-			}
-
-			if blue_n <= 14 {
-				valid_blue = valid_blue && true
-			} else {
-				valid_blue = false
-			}
-		}
-
-		if valid_red && valid_green && valid_blue {
+		if max_red <= 12 && max_green <= 13 && max_blue <= 14 {
 			index_total += game_index
 		}
 	}
@@ -61,10 +44,26 @@ func main() {
 	fmt.Println(index_total)
 }
 
-func extractNumbers(s string) int {
+func extractNumbers(s string) []int {
 	number_re := regexp.MustCompile("[0-9]+")
 
-	return toInt(number_re.FindAllString(s, -1)[0])
+	var number_array []int
+	for _, e := range number_re.FindAllString(s, -1) {
+		number_array = append(number_array, toInt(e))
+	}
+
+	return number_array
+}
+
+func extractNumberArray(s []string) []int {
+	number_re := regexp.MustCompile("[0-9]+")
+
+	var number_array []int
+	for _, e := range s {
+		number_array = append(number_array, toInt(number_re.FindAllString(e, -1)[0]))
+	}
+
+	return number_array
 }
 
 func toInt(s string) int {
