@@ -22,7 +22,6 @@ func main() {
 	blue_re := regexp.MustCompile(" [0-9]+ blue")
 	scanner := bufio.NewScanner(file)
 	total := 0
-	power := 0
 
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), ":")
@@ -33,6 +32,7 @@ func main() {
 		max_blue := 0
 
 		for i := 0; i < len(game_results); i++ {
+			// add 0 to games where that colour did not get pulled out
 			red_n := extractNumbers(append(red_re.FindAllString(game_results[i], -1), "0")[0])
 			green_n := extractNumbers(append(green_re.FindAllString(game_results[i], -1), "0")[0])
 			blue_n := extractNumbers(append(blue_re.FindAllString(game_results[i], -1), "0")[0])
@@ -42,8 +42,7 @@ func main() {
 			max_blue = max(max_blue, blue_n)
 		}
 
-		power = max_red * max_green * max_blue
-		total += power
+		total += max_red * max_green * max_blue
 	}
 
 	fmt.Println(total)
