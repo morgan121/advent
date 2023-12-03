@@ -63,7 +63,6 @@ func main() {
 				arrayOfNumbersAroundThisStar = append(arrayOfNumbersAroundThisStar, parseNumberFromLine(lines[lineIndex+1], numberPos[0]+firstStarIndex))
 			}
 
-			// fmt.Println(arrayOfNumbersAroundThisStar)
 			total += ratio(arrayOfNumbersAroundThisStar)
 		}
 	}
