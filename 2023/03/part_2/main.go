@@ -106,10 +106,6 @@ func parseNumberFromLine(line string, numberIndex int) int {
 	return toInt(numberString)
 }
 
-func getNumberAtPositions(lineIndex int, numberIndexPair []int, lines []string) int {
-	return toInt(lines[lineIndex][numberIndexPair[0]:numberIndexPair[1]])
-}
-
 func toInt(s string) int {
 	n, err := strconv.Atoi(s)
 	if err != nil {
