@@ -29,41 +29,37 @@ func main() {
 		starPositions := starRegExp.FindAllStringIndex(line, -1)
 
 		for _, starIndexPair := range starPositions {
-			firstStarIndex := max(starIndexPair[0]-1, 0)
-			lastStarIndex := min(starIndexPair[1]+1, len(line)-1)
-
 			var previousLine [][]int
 			var thisLine [][]int
 			var nextLine [][]int
-
-			if lineIndex > 0 {
-				previousLine = numberRegExp.FindAllStringIndex(lines[lineIndex-1][firstStarIndex:lastStarIndex], -1)
-			}
-
-			thisLine = numberRegExp.FindAllStringIndex(lines[lineIndex][firstStarIndex:lastStarIndex], -1)
-
-			if lineIndex < len(lines)-1 {
-				nextLine = numberRegExp.FindAllStringIndex(lines[lineIndex+1][firstStarIndex:lastStarIndex], -1)
-			}
-
-			// there must be EXACTLY 2 numbers
-			if len(previousLine)+len(thisLine)+len(nextLine) != 2 {
-				continue
-			}
-
 			var arrayOfNumbersAroundThisStar []int
 
-			for _, numberPos := range previousLine {
-				arrayOfNumbersAroundThisStar = append(arrayOfNumbersAroundThisStar, parseNumberFromLine(lines[lineIndex-1], numberPos[0]+firstStarIndex))
-			}
-			for _, numberPos := range thisLine {
-				arrayOfNumbersAroundThisStar = append(arrayOfNumbersAroundThisStar, parseNumberFromLine(lines[lineIndex], numberPos[0]+firstStarIndex))
-			}
-			for _, numberPos := range nextLine {
-				arrayOfNumbersAroundThisStar = append(arrayOfNumbersAroundThisStar, parseNumberFromLine(lines[lineIndex+1], numberPos[0]+firstStarIndex))
+			startLeftBufferIndex := max(starIndexPair[0]-1, 0)
+			startRightBufferIndex := min(starIndexPair[1]+1, len(line)-1)
+
+			if lineIndex > 0 {
+				previousLine = numberRegExp.FindAllStringIndex(lines[lineIndex-1][startLeftBufferIndex:startRightBufferIndex], -1)
 			}
 
-			total += ratio(arrayOfNumbersAroundThisStar)
+			thisLine = numberRegExp.FindAllStringIndex(lines[lineIndex][startLeftBufferIndex:startRightBufferIndex], -1)
+
+			if lineIndex < len(lines)-1 {
+				nextLine = numberRegExp.FindAllStringIndex(lines[lineIndex+1][startLeftBufferIndex:startRightBufferIndex], -1)
+			}
+
+			for _, numberPos := range previousLine {
+				arrayOfNumbersAroundThisStar = append(arrayOfNumbersAroundThisStar, parseNumberFromLine(lines[lineIndex-1], numberPos[0]+startLeftBufferIndex))
+			}
+			for _, numberPos := range thisLine {
+				arrayOfNumbersAroundThisStar = append(arrayOfNumbersAroundThisStar, parseNumberFromLine(lines[lineIndex], numberPos[0]+startLeftBufferIndex))
+			}
+			for _, numberPos := range nextLine {
+				arrayOfNumbersAroundThisStar = append(arrayOfNumbersAroundThisStar, parseNumberFromLine(lines[lineIndex+1], numberPos[0]+startLeftBufferIndex))
+			}
+
+			if len(arrayOfNumbersAroundThisStar) == 2 {
+				total += ratio(arrayOfNumbersAroundThisStar)
+			}
 		}
 	}
 
