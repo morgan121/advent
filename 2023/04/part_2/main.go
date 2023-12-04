@@ -42,7 +42,7 @@ func main() {
 	}
 
 	keys := make([]int, 0, len(cardLineInfoMap))
-	for k, _ := range cardLineInfoMap {
+	for k := range cardLineInfoMap {
 		keys = append(keys, k)
 	}
 	sort.Ints(keys)
