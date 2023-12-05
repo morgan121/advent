@@ -9,12 +9,11 @@ import (
 )
 
 var (
-	numberRegExp    = regexp.MustCompile("[0-9]+")
-	linebreakRegExp = regexp.MustCompile(`\r?\n`)
-	chunkRegExp     = regexp.MustCompile("seeds: |seed-to-soil map:|soil-to-fertilizer map:|fertilizer-to-water map:|water-to-light map:|light-to-temperature map:|temperature-to-humidity map:|humidity-to-location map:")
+	numberRegExp = regexp.MustCompile("[0-9]+")
+	chunkRegExp  = regexp.MustCompile("seeds: |seed-to-soil map:|soil-to-fertilizer map:|fertilizer-to-water map:|water-to-light map:|light-to-temperature map:|temperature-to-humidity map:|humidity-to-location map:")
 )
 
-type PuzzleMap struct {
+type Mapper struct {
 	destinationStart int
 	sourceStart      int
 	rangeLength      int
@@ -27,13 +26,13 @@ func main() {
 	output := 0
 
 	var seeds []int
-	var seedToSoil []PuzzleMap
-	var soilToFertilizer []PuzzleMap
-	var fertilizerToWater []PuzzleMap
-	var waterToLight []PuzzleMap
-	var lightToTemp []PuzzleMap
-	var tempToHumidity []PuzzleMap
-	var humidityToLocation []PuzzleMap
+	var seedToSoil []Mapper
+	var soilToFertilizer []Mapper
+	var fertilizerToWater []Mapper
+	var waterToLight []Mapper
+	var lightToTemp []Mapper
+	var tempToHumidity []Mapper
+	var humidityToLocation []Mapper
 
 	for i, chunk := range chunks {
 		allNumbers := arrayToInt(numberRegExp.FindAllString(chunk, -1))
@@ -79,22 +78,22 @@ func main() {
 	fmt.Println(output)
 }
 
-func parseChunk(numbers []int) []PuzzleMap {
-	var puzzleMap []PuzzleMap
+func parseChunk(numbers []int) []Mapper {
+	var mapper []Mapper
 
 	for e := 0; e < len(numbers); e += 3 {
-		row := PuzzleMap{
+		row := Mapper{
 			destinationStart: numbers[e],
 			sourceStart:      numbers[e+1],
 			rangeLength:      numbers[e+2],
 		}
-		puzzleMap = append(puzzleMap, row)
+		mapper = append(mapper, row)
 	}
 
-	return puzzleMap
+	return mapper
 }
 
-func sourceToDestination(mapper []PuzzleMap, sourceValue int) int {
+func sourceToDestination(mapper []Mapper, sourceValue int) int {
 	for _, info := range mapper {
 		start := info.sourceStart
 		end := info.sourceStart + info.rangeLength
