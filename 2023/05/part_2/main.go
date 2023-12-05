@@ -20,13 +20,18 @@ type PuzzleMap struct {
 	rangeLength      int
 }
 
+type SeedRange struct {
+	start  int
+	length int
+}
+
 func main() {
 	file := readFile("2023/05/input.txt")
 	chunks := chunkRegExp.Split(string(file), -1)
 
 	output := 0
 
-	var seeds []int
+	var seeds []SeedRange
 	var seedToSoil []PuzzleMap
 	var soilToFertilizer []PuzzleMap
 	var fertilizerToWater []PuzzleMap
@@ -40,7 +45,13 @@ func main() {
 
 		switch i {
 		case 1:
-			seeds = allNumbers
+			for n := 0; n < len(allNumbers); n += 2 {
+				seed := SeedRange{
+					start:  allNumbers[n],
+					length: allNumbers[n+1],
+				}
+				seeds = append(seeds, seed)
+			}
 		case 2:
 			seedToSoil = parseChunk(allNumbers)
 		case 3:
@@ -60,18 +71,20 @@ func main() {
 	}
 
 	for _, seed := range seeds {
-		soil := sourceToDestination(seedToSoil, seed)
-		fertilizer := sourceToDestination(soilToFertilizer, soil)
-		water := sourceToDestination(fertilizerToWater, fertilizer)
-		light := sourceToDestination(waterToLight, water)
-		temp := sourceToDestination(lightToTemp, light)
-		humidity := sourceToDestination(tempToHumidity, temp)
-		location := sourceToDestination(humidityToLocation, humidity)
+		for j := 0; j < seed.length; j++ {
+			soil := sourceToDestination(seedToSoil, seed.start+j)
+			fertilizer := sourceToDestination(soilToFertilizer, soil)
+			water := sourceToDestination(fertilizerToWater, fertilizer)
+			light := sourceToDestination(waterToLight, water)
+			temp := sourceToDestination(lightToTemp, light)
+			humidity := sourceToDestination(tempToHumidity, temp)
+			location := sourceToDestination(humidityToLocation, humidity)
 
-		if output == 0 {
-			output = location
-		} else {
-			output = min(output, location)
+			if output == 0 {
+				output = location
+			} else {
+				output = min(output, location)
+			}
 		}
 	}
 
@@ -98,7 +111,7 @@ func sourceToDestination(mapper []PuzzleMap, sourceValue int) int {
 		start := info.sourceStart
 		end := info.sourceStart + info.rangeLength
 
-		if sourceValue >= start && sourceValue <= end {
+		if sourceValue >= start && sourceValue < end {
 			return (sourceValue - info.sourceStart) + info.destinationStart
 		}
 	}
