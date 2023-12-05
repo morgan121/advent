@@ -38,6 +38,7 @@ func main() {
 	for i, chunk := range chunks {
 		allNumbers := arrayToInt(numberRegExp.FindAllString(chunk, -1))
 
+		// case 0 is an empty string. not sure why
 		switch i {
 		case 1:
 			seeds = allNumbers
