@@ -98,7 +98,7 @@ func sourceToDestination(mapper []Mapper, sourceValue int) int {
 		start := info.sourceStart
 		end := info.sourceStart + info.rangeLength
 
-		if sourceValue >= start && sourceValue <= end {
+		if sourceValue >= start && sourceValue < end {
 			return (sourceValue - info.sourceStart) + info.destinationStart
 		}
 	}
