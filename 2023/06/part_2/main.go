@@ -23,9 +23,7 @@ func main() {
 	numberOfWins := 0
 
 	for hold := 0; hold <= time; hold++ {
-		calcedDistance := hold * (time - hold)
-
-		if calcedDistance > distance {
+		if hold*(time-hold) > distance {
 			numberOfWins++
 		}
 	}

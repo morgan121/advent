@@ -37,9 +37,7 @@ func main() {
 		numberOfWins := 0
 
 		for hold := 0; hold <= race.time; hold++ {
-			distance := hold * (race.time - hold)
-
-			if distance > race.distance {
+			if hold*(race.time-hold) > race.distance {
 				numberOfWins++
 			}
 		}
