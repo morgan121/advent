@@ -24,7 +24,6 @@ type Hand struct {
 	cards    []string
 	bid      int
 	handType int
-	handRank int
 }
 
 var (
@@ -47,7 +46,6 @@ func main() {
 			cards:    cards,
 			bid:      toInt(strings.Split(line, " ")[1]),
 			handType: handType(cards),
-			handRank: 0,
 		}
 
 		hands = append(hands, hand)
