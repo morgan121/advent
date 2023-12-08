@@ -63,7 +63,6 @@ func main() {
 
 			if nextLocations[j][2:3] == "Z" {
 				pathTotals[j] = stepCount
-				fmt.Println(pathTotals)
 			}
 		}
 
