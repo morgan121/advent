@@ -61,16 +61,13 @@ func main() {
 }
 
 func step(currentLocation, direction string) string {
-	switch direction {
-	case "L":
-		stepCount++
+	stepCount++
+
+	if direction == "L" {
 		return instructions[currentLocation].left
-	case "R":
-		stepCount++
-		return instructions[currentLocation].right
 	}
 
-	return "Uh-oh"
+	return instructions[currentLocation].right
 }
 
 func readFile(filepath string) []byte {
