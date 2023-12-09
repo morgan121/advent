@@ -11,7 +11,6 @@ import (
 var (
 	numberRegExp    = regexp.MustCompile("-?[0-9]+")
 	lineBreakRegExp = regexp.MustCompile(`\r?\n`)
-	// sequence        = make(map[int][]int, 0)
 )
 
 func main() {
