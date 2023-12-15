@@ -7,8 +7,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"gonum.org/v1/gonum/stat/combin"
 )
 
 type Point struct {
@@ -25,91 +23,102 @@ func main() {
 	file := readFile("2023/12/input.txt")
 	lines := lineBreakRegExp.Split(string(file), -1)
 
-	characterMap := make(map[int]string)
-	characterMap[0] = "."
-	characterMap[1] = "#"
-
-	totalCombos := 0
-
 	for _, line := range lines {
-		hotsprings := strings.Split(line, " ")[0]
-		damagedMap := arrayToInt(strings.Split(strings.Split(line, " ")[1], ","))
-		var hs []string
-		var dm []int
-		for i := 0; i < 1; i++ {
-			hs = append(hs, hotsprings)
-			dm = append(dm, damagedMap...)
-		}
-		hotsprings = strings.Join(hs, "?")
-		damagedMap = dm
+		pattern := unfoldpattern(strings.Split(strings.Split(line, " ")[0], ""))
+		report := unfoldReport(arrayToInt(strings.Split(strings.Split(line, " ")[1], ",")))
+		total := 0
 
-		questionIndex := questionRegExp.FindAllStringIndex(hotsprings, -1)
-		combinations := allArrangements(questionIndex)
+		fullReport := make([]int, len(pattern))
+		var tempReport []int
 
-		for _, combination := range combinations {
-			for i, e := range combination {
-				hotsprings = replace(hotsprings, questionIndex[i][0], characterMap[e])
+		// create the initial report layout (of the correct size)
+		for i, count := range report {
+			var nextChunk []int
+
+			for j := 0; j < count; j++ {
+				nextChunk = append(nextChunk, j+1)
 			}
 
-			if damagedReportFits(hotsprings, damagedMap) {
-				totalCombos++
+			tempReport = append(tempReport, nextChunk...)
+
+			if i < len(report)-1 {
+				tempReport = append(tempReport, 0)
 			}
 		}
+
+		copy(fullReport, tempReport)
+
+		if reportMatchesPattern(pattern, fullReport) {
+			total++
+		}
+
+		// for {
+		// 	// if report fits totalCombos++
+		// 	// report = get next report
+		// 	// break if nil report
+		// }
+
+		fmt.Println(fullReport)
+		fmt.Println(total)
 	}
-
-	fmt.Println(totalCombos)
 }
 
-func damagedReportFits(hotsprings string, damage []int) bool {
-	hashGroups := hashRegExp.FindAllStringIndex(hotsprings, -1)
+func nextReportLayout(report []int) []int {
+	var nextReport []int
+	if report[len(report)-1] == 0 {
+		// I give up
+	}
 
-	// there must be one hash group per damage report
-	if len(hashGroups) != len(damage) {
-		return false
-	} else {
-		for i, hashGroup := range hashGroups {
-			if damage[i] != hashGroup[1]-hashGroup[0] {
-				return false
-			}
+	return nextReport
+}
+
+func reportMatchesPattern(pattern []string, report []int) bool {
+	// . = 0
+	// # = 1
+	// ? could be either
+	for index := range pattern {
+		if report[index] == 0 && pattern[index] == "#" || report[index] > 0 && pattern[index] == "." {
+			return false
 		}
 	}
 
 	return true
 }
 
-func replace(str string, index int, replacement string) string {
-	return str[:index] + replacement + str[index+1:]
+func moveInt(array []int, srcIndex int, dstIndex int) []int {
+	value := array[srcIndex]
+	return insertInt(removeInt(array, srcIndex), value, dstIndex)
 }
 
-func allArrangements(questionMarks [][]int) [][]int {
-	var lens []int
-
-	for i := 0; i < len(questionMarks); i++ {
-		lens = append(lens, 2)
-	}
-
-	combinations := combin.Cartesian(lens)
-
-	return combinations
+func insertInt(array []int, value int, index int) []int {
+	return append(array[:index], append([]int{value}, array[index:]...)...)
 }
 
-func split(a []int) [][]int {
-	var output [][]int
-
-	for i := 0; i < 2; i++ {
-		output = append(output, append(a, i))
-	}
-	return output
+func removeInt(array []int, index int) []int {
+	return append(array[:index], array[index+1:]...)
 }
 
-func sum(nums []int) int {
-	total := 0
+func unfoldpattern(s []string) []string {
+	var h []string
 
-	for _, num := range nums {
-		total += num
+	// for i := 0; i < 4; i++ {
+	// 	h = append(h, s...)
+	// 	h = append(h, "?")
+	// }
+
+	h = append(h, s...)
+
+	return h
+}
+
+func unfoldReport(r []int) []int {
+	var dm []int
+
+	for i := 0; i < 1; i++ {
+		dm = append(dm, r...)
 	}
 
-	return total
+	return dm
 }
 
 func arrayToInt(s []string) []int {
@@ -120,16 +129,6 @@ func arrayToInt(s []string) []int {
 	}
 
 	return intArray
-}
-
-func arrayToString(i []int) []string {
-	var stringArray []string
-
-	for _, e := range i {
-		stringArray = append(stringArray, strconv.Itoa(e))
-	}
-
-	return stringArray
 }
 
 func toInt(s string) int {
