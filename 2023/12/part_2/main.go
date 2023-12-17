@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -14,8 +15,7 @@ type Point struct {
 }
 
 var (
-	hashRegExp      = regexp.MustCompile("#+")
-	questionRegExp  = regexp.MustCompile("[?]")
+	count           int
 	lineBreakRegExp = regexp.MustCompile(`\r?\n`)
 )
 
@@ -23,88 +23,177 @@ func main() {
 	file := readFile("2023/12/input.txt")
 	lines := lineBreakRegExp.Split(string(file), -1)
 
-	for _, line := range lines {
+	for i, line := range lines {
 		pattern := unfoldpattern(strings.Split(strings.Split(line, " ")[0], ""))
 		report := unfoldReport(arrayToInt(strings.Split(strings.Split(line, " ")[1], ",")))
-		total := 0
-
-		fullReport := make([]int, len(pattern))
-		var tempReport []int
-
-		// create the initial report layout (of the correct size)
-		for i, count := range report {
-			var nextChunk []int
-
-			for j := 0; j < count; j++ {
-				nextChunk = append(nextChunk, j+1)
-			}
-
-			tempReport = append(tempReport, nextChunk...)
-
-			if i < len(report)-1 {
-				tempReport = append(tempReport, 0)
+		fmt.Printf("Splitting line %d\n", i)
+		for {
+			if pattern[len(pattern)-1] == "." {
+				pattern = pattern[:len(pattern)-1]
+			} else if pattern[0] == "." {
+				pattern = pattern[1:]
+			} else {
+				break
 			}
 		}
 
-		copy(fullReport, tempReport)
+		reportFits(report, pattern)
+	}
 
-		if reportMatchesPattern(pattern, fullReport) {
-			total++
+	fmt.Println(count)
+}
+
+func reportFits(report []int, pattern []string) {
+	chunkSize := report[0]
+	// fmt.Printf("report value: %d, pattern: %s\n", chunkSize, pattern)
+
+	// not enough space left in pattern
+	if sum(report) > len(pattern)+len(report)-1 || chunkSize > len(pattern) {
+		return
+	}
+
+	// if allQuestions(pattern) {
+	// 	n := len(pattern) - sum(report) + 1
+	// 	r := len(report)
+	// 	surplusN := n - 39
+	// 	surplusR := r - 15
+	// 	total := 0
+
+	// 	if surplusN > 0 && surplusR > 0 {
+	// 		fmt.Println(factorial(39))
+	// 		fmt.Println(((factorial(15)) * (factorial(n - r))))
+	// 		fmt.Println(float64(factorial(39)) / float64(((factorial(15)) * (factorial(n - r)))))
+	// 		total = factorial(39) / ((factorial(15)) * (factorial(n - r)))
+	// 		for sn := 1; sn < surplusN+1; sn++ {
+	// 			for sr := 1; sr < surplusR+1; sr++ {
+	// 				fmt.Println(total)
+	// 				total = total * (39 + sn) / (15 + sr)
+	// 				fmt.Println(total)
+	// 			}
+	// 		}
+	// 	}
+
+	// 	count += total
+	// 	return
+	// }
+
+	chunk := pattern[:chunkSize]
+
+	if pattern[0] == "." {
+		// fmt.Println("EAT DOT")
+		reportFits(report, pattern[1:])
+		return
+	}
+
+	if len(report) == 1 && chunkSize == len(pattern) && !slices.Contains(chunk, ".") {
+		// fmt.Println("YEAH BOI - 1")
+
+		count++
+		return
+	}
+
+	if len(report) != 1 && chunkSize == len(pattern) {
+		return
+	}
+
+	if slices.Contains(chunk, ".") {
+		if chunk[0] == "?" {
+			reportFits(report, pattern[1:])
+		}
+		return
+	}
+
+	if len(report) == 1 && allQuestionOrDots(pattern[chunkSize:]) {
+		// fmt.Println("YEAH BOI - 2")
+		count++
+	}
+
+	switch chunk[0] {
+	case "#":
+		// fmt.Println("hash")
+		// treat subsequent ? as .
+		if pattern[chunkSize] == "?" {
+			// fmt.Println("    hash - question")
+			if len(report) > 1 {
+				reportFits(report[1:], pattern[chunkSize+1:])
+			}
+			return
 		}
 
-		// for {
-		// 	// if report fits totalCombos++
-		// 	// report = get next report
-		// 	// break if nil report
-		// }
+		// doesnt fit pattern
+		if pattern[chunkSize] == "#" {
+			// fmt.Println("    hash - hash")
+			return
+		}
 
-		fmt.Println(fullReport)
-		fmt.Println(total)
+		// next char is "."
+		// fmt.Println("    hash - dot")
+		if len(report) > 1 {
+			reportFits(report[1:], pattern[chunkSize:])
+		}
+	case "?":
+		// fmt.Println("question")
+		if pattern[chunkSize] == "#" {
+			// fmt.Println("    question - hash")
+			reportFits(report, pattern[1:])
+		}
+
+		if pattern[chunkSize] == "." {
+			// fmt.Println("    question - dot")
+			if len(report) > 1 {
+				reportFits(report[1:], pattern[chunkSize:])
+			}
+
+			// if all questions in the chunk are dots
+			if allQuestionOrDots(chunk) {
+				reportFits(report, pattern[chunkSize:])
+			}
+		}
+
+		if pattern[chunkSize] == "?" {
+			// fmt.Println("    question - question")
+			// treat next question as dot
+			if len(report) > 1 {
+				reportFits(report[1:], pattern[chunkSize+1:])
+			}
+
+			// treat first question as dot
+			reportFits(report, pattern[1:])
+		}
 	}
 }
 
-func nextReportLayout(report []int) []int {
-	var nextReport []int
-	if report[len(report)-1] == 0 {
-		// I give up
+func factorial(n int) int {
+	if n <= 1 {
+		return 1
 	}
 
-	return nextReport
+	return n * factorial(n-1)
 }
 
-func reportMatchesPattern(pattern []string, report []int) bool {
-	// . = 0
-	// # = 1
-	// ? could be either
-	for index := range pattern {
-		if report[index] == 0 && pattern[index] == "#" || report[index] > 0 && pattern[index] == "." {
-			return false
-		}
+func allQuestions(pattern []string) bool {
+	if slices.Contains(pattern, "#") || slices.Contains(pattern, ".") {
+		return false
 	}
 
 	return true
 }
 
-func moveInt(array []int, srcIndex int, dstIndex int) []int {
-	value := array[srcIndex]
-	return insertInt(removeInt(array, srcIndex), value, dstIndex)
-}
+func allQuestionOrDots(pattern []string) bool {
+	if slices.Contains(pattern, "#") {
+		return false
+	}
 
-func insertInt(array []int, value int, index int) []int {
-	return append(array[:index], append([]int{value}, array[index:]...)...)
-}
-
-func removeInt(array []int, index int) []int {
-	return append(array[:index], array[index+1:]...)
+	return true
 }
 
 func unfoldpattern(s []string) []string {
 	var h []string
 
-	// for i := 0; i < 4; i++ {
-	// 	h = append(h, s...)
-	// 	h = append(h, "?")
-	// }
+	for i := 0; i < 4; i++ {
+		h = append(h, s...)
+		h = append(h, "?")
+	}
 
 	h = append(h, s...)
 
@@ -114,11 +203,21 @@ func unfoldpattern(s []string) []string {
 func unfoldReport(r []int) []int {
 	var dm []int
 
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 5; i++ {
 		dm = append(dm, r...)
 	}
 
 	return dm
+}
+
+func sum(nums []int) int {
+	total := 0
+
+	for _, num := range nums {
+		total += num
+	}
+
+	return total
 }
 
 func arrayToInt(s []string) []int {
