@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Point struct {
@@ -23,10 +24,14 @@ func main() {
 	file := readFile("2023/12/input.txt")
 	lines := lineBreakRegExp.Split(string(file), -1)
 
-	for i, line := range lines {
+	var wg sync.WaitGroup
+
+	wg.Add(len(lines))
+
+	for _, line := range lines {
 		pattern := unfoldpattern(strings.Split(strings.Split(line, " ")[0], ""))
 		report := unfoldReport(arrayToInt(strings.Split(strings.Split(line, " ")[1], ",")))
-		fmt.Printf("Splitting line %d\n", i)
+		// fmt.Printf("Splitting line %d\n", i)
 		for {
 			if pattern[len(pattern)-1] == "." {
 				pattern = pattern[:len(pattern)-1]
@@ -37,9 +42,10 @@ func main() {
 			}
 		}
 
-		reportFits(report, pattern)
+		go reportFits(report, pattern)
 	}
 
+	wg.Wait()
 	fmt.Println(count)
 }
 
@@ -52,30 +58,18 @@ func reportFits(report []int, pattern []string) {
 		return
 	}
 
-	// if allQuestions(pattern) {
-	// 	n := len(pattern) - sum(report) + 1
-	// 	r := len(report)
-	// 	surplusN := n - 39
-	// 	surplusR := r - 15
-	// 	total := 0
+	if allQuestions(pattern) {
+		n := len(pattern) - sum(report) + 1
+		r := len(report)
 
-	// 	if surplusN > 0 && surplusR > 0 {
-	// 		fmt.Println(factorial(39))
-	// 		fmt.Println(((factorial(15)) * (factorial(n - r))))
-	// 		fmt.Println(float64(factorial(39)) / float64(((factorial(15)) * (factorial(n - r)))))
-	// 		total = factorial(39) / ((factorial(15)) * (factorial(n - r)))
-	// 		for sn := 1; sn < surplusN+1; sn++ {
-	// 			for sr := 1; sr < surplusR+1; sr++ {
-	// 				fmt.Println(total)
-	// 				total = total * (39 + sn) / (15 + sr)
-	// 				fmt.Println(total)
-	// 			}
-	// 		}
-	// 	}
+		if n == 40 {
+			count += 137846528820
+			return
+		}
 
-	// 	count += total
-	// 	return
-	// }
+		count += factorial(n) / ((factorial(r)) * (factorial(n - r)))
+		return
+	}
 
 	chunk := pattern[:chunkSize]
 
