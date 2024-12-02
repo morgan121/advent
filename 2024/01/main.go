@@ -23,50 +23,50 @@ func main() {
 	re := regexp.MustCompile("[0-9]+")
 	scanner := bufio.NewScanner(file)
 
-	var col_1 []int
-	var col_2 []int
+	var left []int
+	var right []int
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		number_pair := re.FindAllString(line, -1)
-		col_1 = append(col_1, toInt(number_pair[0]))
-		col_2 = append(col_2, toInt(number_pair[1]))
+		left = append(left, toInt(number_pair[0]))
+		right = append(right, toInt(number_pair[1]))
 	}
 
 	switch parts {
 	case "1":
-		part1(col_1, col_2)
+		part1(left, right)
 	case "2":
-		part2(col_1, col_2)
+		part2(left, right)
 	case "both":
-		part1(col_1, col_2)
-		part2(col_1, col_2)
+		part1(left, right)
+		part2(left, right)
 	}
 }
 
-func part1(col_1 []int, col_2 []int) {
+func part1(left []int, right []int) {
 	total := 0
 
-	sortSlice(col_1)
-	sortSlice(col_2)
+	sortSlice(left)
+	sortSlice(right)
 
-	for i := 0; i < len(col_1); i++ {
-		total += absInt(col_2[i], col_1[i])
+	for i := 0; i < len(left); i++ {
+		total += absInt(right[i], left[i])
 	}
 
 	fmt.Println(total)
 }
 
-func part2(col_1 []int, col_2 []int) {
+func part2(left []int, right []int) {
 	total := 0
 	freq := make(map[int]int)
 
-	for i := 0; i < len(col_2); i++ {
-		freq[col_2[i]]++
+	for i := 0; i < len(right); i++ {
+		freq[right[i]]++
 	}
 
-	for i := 0; i < len(col_1); i++ {
-		total += col_1[i] * freq[col_1[i]]
+	for i := 0; i < len(left); i++ {
+		total += left[i] * freq[left[i]]
 	}
 
 	fmt.Println(total)
