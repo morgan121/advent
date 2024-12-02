@@ -11,6 +11,10 @@ import (
 )
 
 func main() {
+	if len(os.Args) < 3 {
+		log.Fatal("Usage: program <parts> <mode>")
+	}
+
 	parts := os.Args[1]
 	mode := os.Args[2]
 
@@ -51,7 +55,7 @@ func part1(left []int, right []int) {
 	slices.Sort(right)
 
 	for i := 0; i < len(left); i++ {
-		total += absInt(right[i], left[i])
+		total += absInt(left[i], right[i])
 	}
 
 	fmt.Println(total)
@@ -61,8 +65,8 @@ func part2(left []int, right []int) {
 	total := 0
 	freq := make(map[int]int)
 
-	for i := 0; i < len(right); i++ {
-		freq[right[i]]++
+	for _, value := range right {
+		freq[value]++
 	}
 
 	for i := 0; i < len(left); i++ {
