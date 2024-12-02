@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"sort"
+	"slices"
 	"strconv"
 )
 
@@ -47,8 +47,8 @@ func main() {
 func part1(left []int, right []int) {
 	total := 0
 
-	sortSlice(left)
-	sortSlice(right)
+	slices.Sort(left)
+	slices.Sort(right)
 
 	for i := 0; i < len(left); i++ {
 		total += absInt(right[i], left[i])
@@ -86,12 +86,4 @@ func toInt(s string) int {
 	}
 
 	return n
-}
-
-func sortSlice(s []int) []int {
-	sort.Slice(s, func(i, j int) bool {
-		return s[i] < s[j]
-	})
-
-	return s
 }
