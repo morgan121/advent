@@ -12,7 +12,7 @@ import (
 
 func main() {
 	if len(os.Args) < 3 {
-		log.Fatal("Usage: program <parts> <mode>")
+		log.Fatal("Usage: program <parts> (1 or 2) <mode> (real or test)")
 	}
 
 	parts := os.Args[1]
@@ -41,9 +41,6 @@ func main() {
 	case "1":
 		part1(left, right)
 	case "2":
-		part2(left, right)
-	case "both":
-		part1(left, right)
 		part2(left, right)
 	}
 }
