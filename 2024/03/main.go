@@ -52,13 +52,11 @@ func calculate(instructions []string) int {
 	enabled := true
 
 	for _, e := range instructions {
-		fmt.Println(e)
 		if e == "do()" {
 			enabled = true
 		} else if e == "don't()" {
 			enabled = false
 		} else {
-			fmt.Println(enabled)
 			if enabled {
 				numbers := re.FindAllString(e, -1)
 				lineTotal += toInt(numbers[0]) * toInt(numbers[1])
