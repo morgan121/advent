@@ -24,25 +24,22 @@ func main() {
 	defer file.Close()
 
 	var re *regexp.Regexp
+	var validInstructions []string
 
 	switch parts {
 	case "1":
-		re = regexp.MustCompile(`mul\([0-9]+,[0-9]+\)`)
+		re = regexp.MustCompile(`mul\(\d{1,3},\d{1,3}\)`)
 	case "2":
-		re = regexp.MustCompile(`do\(\)|don't\(\)|mul\([0-9]+,[0-9]+\)`)
+		re = regexp.MustCompile(`do\(\)|don't\(\)|mul\(\d{1,3},\d{1,3}\)`)
 	}
+
 	scanner := bufio.NewScanner(file)
-
-	total := 0 // 95_786_593 is too high
-
 	for scanner.Scan() {
 		line := scanner.Text()
-		validInstructions := re.FindAllString(line, -1)
-
-		total += calculate(validInstructions)
+		validInstructions = append(validInstructions, re.FindAllString(line, -1)...)
 	}
 
-	fmt.Println(total)
+	fmt.Println(calculate(validInstructions))
 }
 
 func calculate(instructions []string) int {
