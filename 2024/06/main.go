@@ -64,10 +64,10 @@ func main() {
 }
 
 /*
-	  .#...
-		....#
-		X.... <-- startPoint
-		...O.
+.#...
+....#
+X.... <-- startPoint
+...O.
 */
 func startFromBottomLeft(bottomLeft Point) bool {
 	if bottomLeft.x == maxX || bottomLeft.y == 0 {
@@ -98,10 +98,10 @@ func startFromBottomLeft(bottomLeft Point) bool {
 }
 
 /*
-	  .#...
-		....O
-		#....
-		...X. <-- startPoint
+.#...
+....O
+#....
+...X. <-- startPoint
 */
 func startFromBottomRight(bottomRight Point) bool {
 	if bottomRight.x == 0 || bottomRight.y == 0 {
@@ -132,10 +132,10 @@ func startFromBottomRight(bottomRight Point) bool {
 }
 
 /*
-	  .X... <-- startPoint
-		....#
-		O....
-		...#.
+.X... <-- startPoint
+....#
+O....
+...#.
 */
 func startFromTopLeft(topLeft Point) bool {
 	if topLeft.x == maxX || topLeft.y == maxY {
@@ -166,10 +166,10 @@ func startFromTopLeft(topLeft Point) bool {
 }
 
 /*
-	  .O...
-		....X <-- startPoint
-		#....
-		...#.
+.O...
+....X <-- startPoint
+#....
+...#.
 */
 func startFromTopRight(topRight Point) bool {
 	if startPoint.x == 0 || startPoint.y == maxY {
