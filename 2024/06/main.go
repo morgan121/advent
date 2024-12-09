@@ -11,16 +11,22 @@ type Point struct {
 	x, y int
 }
 
+type VisitedPoint struct {
+	x, y      int
+	direction string
+}
+
 type Grid map[Point]string
 
 var (
-	grid          = make(Grid)
-	startPoint    Point
-	direction     string
-	maxX          int
-	maxY          int
-	visited       = make(map[Point]bool)
-	hashLocations []Point
+	grid                 = make(Grid)
+	startPoint           Point
+	direction            string
+	maxX                 int
+	maxY                 int
+	visited              []Point
+	visitedWithDirection = make(map[VisitedPoint]bool)
+	numberOfLoops        = 0
 )
 
 func main() {
@@ -41,204 +47,51 @@ func main() {
 	switch part {
 	case "1":
 		traverse(startPoint)
-		fmt.Println(len(visited))
+		fmt.Println(len(unique(visited)))
 	case "2":
-		total := 0
-		for _, hash := range hashLocations {
-			if startFromBottomLeft(hash) {
-				total++
-			}
-			if startFromBottomRight(hash) {
-				total++
-			}
-			if startFromTopLeft(hash) {
-				total++
-			}
-			if startFromTopRight(hash) {
-				total++
+		traverse(startPoint)
+
+		for _, p := range unique(visited) {
+			visitedWithDirection = make(map[VisitedPoint]bool)
+			direction = "^"
+
+			if grid[p] == "." {
+				grid[p] = "#"
+				traverse(startPoint)
+				grid[p] = "."
 			}
 		}
-		fmt.Println(total) // 1117 is too low
+
+		fmt.Println(numberOfLoops) // 1117 is too low
 	}
 
 }
 
-/*
-.#...
-....#
-X.... <-- startPoint
-...O.
-*/
-func startFromBottomLeft(bottomLeft Point) bool {
-	if bottomLeft.x == maxX || bottomLeft.y == 0 {
-		return false
-	}
+func unique(points []Point) []Point {
+	var unique []Point
 
-	topLeft := findNextHash(Point{x: bottomLeft.x + 1, y: bottomLeft.y}, "^")
-	if topLeft.x > maxX || topLeft.y < 0 {
-		return false
-	}
-
-	topRight := findNextHash(Point{x: topLeft.x, y: topLeft.y + 1}, ">")
-	if topRight.x > maxX || topRight.y > maxY {
-		return false
-	}
-
-	nextHash := findNextHash(Point{x: topRight.x - 1, y: topRight.y}, "v")
-
-	neededBottomRight := Point{x: topRight.x - 1, y: bottomLeft.y + 1}
-	if neededBottomRight.y > maxY {
-		return false
-	}
-
-	if neededBottomRight.y < nextHash.y {
-		fmt.Println("BL: ", neededBottomRight)
-	}
-	return neededBottomRight.y < nextHash.y
-}
-
-/*
-.#...
-....O
-#....
-...X. <-- startPoint
-*/
-func startFromBottomRight(bottomRight Point) bool {
-	if bottomRight.x == 0 || bottomRight.y == 0 {
-		return false
-	}
-
-	bottomLeft := findNextHash(Point{x: bottomRight.x, y: bottomRight.y - 1}, "<")
-	if bottomLeft.x < 0 {
-		return false
-	}
-
-	topLeft := findNextHash(Point{x: bottomLeft.x + 1, y: bottomLeft.y}, "^")
-	if topLeft.y < 0 {
-		return false
-	}
-
-	nextHash := findNextHash(Point{x: topLeft.x, y: topLeft.y + 1}, ">")
-
-	neededTopRight := Point{x: bottomRight.x + 1, y: topLeft.y + 1}
-	if neededTopRight.x > maxX {
-		return false
-	}
-
-	if neededTopRight.x < nextHash.x {
-		fmt.Println("BR: ", neededTopRight)
-	}
-	return neededTopRight.x < nextHash.x
-}
-
-/*
-.X... <-- startPoint
-....#
-O....
-...#.
-*/
-func startFromTopLeft(topLeft Point) bool {
-	if topLeft.x == maxX || topLeft.y == maxY {
-		return false
-	}
-
-	topRight := findNextHash(Point{x: topLeft.x, y: topLeft.y + 1}, ">")
-	if topRight.x > maxX || topRight.y > maxY {
-		return false
-	}
-
-	bottomRight := findNextHash(Point{x: topRight.x - 1, y: topRight.y}, "v")
-	if bottomRight.y > maxY {
-		return false
-	}
-
-	nextHash := findNextHash(Point{x: bottomRight.x, y: bottomRight.y - 1}, "<")
-
-	neededBottomLeft := Point{x: topLeft.x - 1, y: bottomRight.y - 1}
-	if neededBottomLeft.x < 0 {
-		return false
-	}
-
-	if neededBottomLeft.x > nextHash.x {
-		fmt.Println("TL: ", neededBottomLeft)
-	}
-	return neededBottomLeft.x > nextHash.x
-}
-
-/*
-.O...
-....X <-- startPoint
-#....
-...#.
-*/
-func startFromTopRight(topRight Point) bool {
-	if startPoint.x == 0 || startPoint.y == maxY {
-		return false
-	}
-
-	bottomRight := findNextHash(Point{x: topRight.x - 1, y: topRight.y}, "v")
-	if bottomRight.y > maxY {
-		return false
-	}
-
-	bottomLeft := findNextHash(Point{x: bottomRight.x, y: bottomRight.y - 1}, "<")
-	if bottomLeft.x < 0 {
-		return false
-	}
-
-	nextHash := findNextHash(Point{x: bottomLeft.x + 1, y: bottomLeft.y}, "^")
-
-	neededTopLeft := Point{x: bottomLeft.x + 1, y: topRight.y - 1}
-	if neededTopLeft.y < 0 {
-		return false
-	}
-
-	if neededTopLeft.y > nextHash.y {
-		fmt.Println("TR: ", neededTopLeft)
-	}
-	return neededTopLeft.y > nextHash.y
-}
-
-func findNextHash(startPoint Point, direction string) Point {
-	switch direction {
-	case "^":
-		if startPoint.y < 0 {
-			return startPoint
-		} else if grid[Point{x: startPoint.x, y: startPoint.y - 1}] == "#" {
-			return Point{x: startPoint.x, y: startPoint.y - 1}
-		} else {
-			startPoint = Point{x: startPoint.x, y: startPoint.y - 1}
+	for _, v := range points {
+		skip := false
+		for _, u := range unique {
+			if v == u {
+				skip = true
+				break
+			}
 		}
-	case ">":
-		if startPoint.x > maxX {
-			return startPoint
-		} else if grid[Point{x: startPoint.x + 1, y: startPoint.y}] == "#" {
-			return Point{x: startPoint.x + 1, y: startPoint.y}
-		} else {
-			startPoint = Point{x: startPoint.x + 1, y: startPoint.y}
-		}
-	case "v":
-		if startPoint.y > maxY {
-			return startPoint
-		} else if grid[Point{x: startPoint.x, y: startPoint.y + 1}] == "#" {
-			return Point{x: startPoint.x, y: startPoint.y + 1}
-		} else {
-			startPoint = Point{x: startPoint.x, y: startPoint.y + 1}
-		}
-	case "<":
-		if startPoint.x < 0 {
-			return startPoint
-		} else if grid[Point{x: startPoint.x - 1, y: startPoint.y}] == "#" {
-			return Point{x: startPoint.x - 1, y: startPoint.y}
-		} else {
-			startPoint = Point{x: startPoint.x - 1, y: startPoint.y}
+		if !skip {
+			unique = append(unique, v)
 		}
 	}
 
-	return findNextHash(startPoint, direction)
+	return unique
 }
 
 func traverse(startPoint Point) {
+	if visitedWithDirection[VisitedPoint{x: startPoint.x, y: startPoint.y, direction: direction}] {
+		numberOfLoops++
+		return
+	}
+
 	switch direction {
 	case "^":
 		if startPoint.y < 0 {
@@ -246,7 +99,8 @@ func traverse(startPoint Point) {
 		} else if grid[Point{x: startPoint.x, y: startPoint.y - 1}] == "#" {
 			direction = ">"
 		} else {
-			visited[startPoint] = true
+			visited = append(visited, startPoint)
+			visitedWithDirection[VisitedPoint{x: startPoint.x, y: startPoint.y, direction: direction}] = true
 			startPoint = Point{x: startPoint.x, y: startPoint.y - 1}
 		}
 	case ">":
@@ -255,7 +109,8 @@ func traverse(startPoint Point) {
 		} else if grid[Point{x: startPoint.x + 1, y: startPoint.y}] == "#" {
 			direction = "v"
 		} else {
-			visited[startPoint] = true
+			visited = append(visited, startPoint)
+			visitedWithDirection[VisitedPoint{x: startPoint.x, y: startPoint.y, direction: direction}] = true
 			startPoint = Point{x: startPoint.x + 1, y: startPoint.y}
 		}
 	case "v":
@@ -264,7 +119,8 @@ func traverse(startPoint Point) {
 		} else if grid[Point{x: startPoint.x, y: startPoint.y + 1}] == "#" {
 			direction = "<"
 		} else {
-			visited[startPoint] = true
+			visited = append(visited, startPoint)
+			visitedWithDirection[VisitedPoint{x: startPoint.x, y: startPoint.y, direction: direction}] = true
 			startPoint = Point{x: startPoint.x, y: startPoint.y + 1}
 		}
 	case "<":
@@ -274,7 +130,8 @@ func traverse(startPoint Point) {
 		if grid[Point{x: startPoint.x - 1, y: startPoint.y}] == "#" {
 			direction = "^"
 		} else {
-			visited[startPoint] = true
+			visited = append(visited, startPoint)
+			visitedWithDirection[VisitedPoint{x: startPoint.x, y: startPoint.y, direction: direction}] = true
 			startPoint = Point{x: startPoint.x - 1, y: startPoint.y}
 		}
 	default:
@@ -301,11 +158,7 @@ func parse(file *os.File) (Grid, Point, int, int) {
 			grid[point] = string(line[i])
 
 			if string(line[i]) == "^" {
-				startPoint = point
-			}
-
-			if string(line[i]) == "#" {
-				hashLocations = append(hashLocations, point)
+				startPoint = Point{x: point.x, y: point.y}
 			}
 		}
 
