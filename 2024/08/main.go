@@ -36,7 +36,7 @@ func main() {
 	case "1":
 		calculatePart1()
 	case "2":
-
+		calculatePart2()
 	}
 
 	fmt.Println(len(antinodes))
@@ -45,7 +45,7 @@ func main() {
 func calculatePart1() {
 	for _, value := range antennae {
 		for i := 0; i < len(value); i++ {
-			point := value[i]
+			startPoint := value[i]
 
 			for j := 0; j < len(value); j++ {
 				if i == j {
@@ -53,10 +53,7 @@ func calculatePart1() {
 				}
 				otherPoint := value[j]
 
-				xDiff := point.x - otherPoint.x
-				yDiff := point.y - otherPoint.y
-
-				potentialAntinode := Point{x: otherPoint.x - xDiff, y: otherPoint.y - yDiff}
+				potentialAntinode := getAntinode(startPoint, otherPoint)
 
 				if grid[potentialAntinode] != "" {
 					antinodes[potentialAntinode] = true
@@ -64,6 +61,50 @@ func calculatePart1() {
 			}
 		}
 	}
+}
+
+func calculatePart2() {
+	for _, value := range antennae {
+		for i := 0; i < len(value); i++ {
+			startPoint := value[i]
+			antinodes[startPoint] = true
+
+			for j := 0; j < len(value); j++ {
+				if i == j {
+					continue
+				}
+				otherPoint := value[j]
+
+				stillInsideGrid := true
+				tmpStartPoint := copyOf(startPoint)
+				tmpOtherPoint := copyOf(otherPoint)
+				for ok := true; ok; ok = stillInsideGrid {
+					potentialAntinode := getAntinode(tmpStartPoint, tmpOtherPoint)
+
+					if grid[potentialAntinode] != "" {
+						antinodes[potentialAntinode] = true
+						tmpStartPoint = copyOf(tmpOtherPoint)
+						tmpOtherPoint = copyOf(potentialAntinode)
+					} else {
+						stillInsideGrid = false
+					}
+				}
+			}
+		}
+	}
+}
+
+func copyOf(p Point) Point {
+	return Point{x: p.x, y: p.y}
+}
+
+func getAntinode(p1 Point, p2 Point) Point {
+	xDiff := p1.x - p2.x
+	yDiff := p1.y - p2.y
+
+	potentialAntinode := Point{x: p2.x - xDiff, y: p2.y - yDiff}
+
+	return potentialAntinode
 }
 
 func parse(file *os.File) Grid {
