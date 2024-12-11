@@ -102,7 +102,7 @@ func condenseByBlock(disc []int) []int {
 			return gap.length >= block.length
 		})
 
-		if firstAvailableGapIdx == -1 {
+		if firstAvailableGapIdx == -1 || gaps[firstAvailableGapIdx].startIdx > block.startIdx {
 			continue
 		} else {
 			gap := gaps[firstAvailableGapIdx]
