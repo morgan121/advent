@@ -46,7 +46,11 @@ func main() {
 	case "1":
 		fmt.Println(len(completedTrails))
 	case "2":
-		calculateTotal()
+		total := 0
+		for _, val := range trailHeads {
+			total += val
+		}
+		fmt.Println(total)
 	}
 }
 
@@ -54,8 +58,8 @@ func walkTrails(startPoint Point, originPoint Point) {
 	value := grid[startPoint]
 
 	if value == 9 {
-		trailHeads[originPoint]++
 		completedTrails[Trail{start: originPoint, end: startPoint}] = true
+		trailHeads[originPoint]++
 		return
 	}
 
@@ -74,16 +78,6 @@ func walkTrails(startPoint Point, originPoint Point) {
 	if grid[Point{x: startPoint.x + 1, y: startPoint.y}] == value+1 {
 		walkTrails(Point{x: startPoint.x + 1, y: startPoint.y}, originPoint)
 	}
-}
-
-func calculateTotal() {
-	total := 0
-
-	for _, val := range trailHeads {
-		total += val
-	}
-
-	fmt.Println(total)
 }
 
 func toInt(s string) int {
