@@ -6,7 +6,12 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
+)
+
+var (
+	stones = make([]int, 0)
 )
 
 func main() {
@@ -20,13 +25,42 @@ func main() {
 	file, _ := os.Open(fmt.Sprintf("2024/11/%s.txt", mode))
 	defer file.Close()
 
-	stones := parse(file)
+	parse(file)
 
 	switch part {
 	case "1":
-		fmt.Println(stones)
+		for i := 0; i < 25; i++ {
+			blink()
+		}
+		fmt.Println(len(stones))
 	case "2":
 	}
+}
+
+func blink() {
+	for i := 0; i < len(stones); i++ {
+		convertedStone := convertStone(stones[i])
+		stones = slices.Delete(stones, i, i+1)
+		stones = slices.Insert(stones, i, convertedStone...)
+
+		if len(convertedStone) > 1 {
+			i++
+		}
+	}
+}
+
+func convertStone(stone int) []int {
+	if stone == 0 {
+		return []int{1}
+	} else if len(strconv.Itoa(stone))%2 == 0 {
+		stringStone := strconv.Itoa(stone)
+		return []int{
+			toInt(stringStone[:len(stringStone)/2]),
+			toInt(stringStone[len(stringStone)/2:]),
+		}
+	}
+
+	return []int{stone * 2024}
 }
 
 func arrayToInt(s []string) []int {
@@ -48,16 +82,13 @@ func toInt(s string) int {
 	return n
 }
 
-func parse(file *os.File) []int {
+func parse(file *os.File) {
 	scanner := bufio.NewScanner(file)
 	re := regexp.MustCompile(`\d+`)
 
-	var stones []int
 	for scanner.Scan() {
 		line := scanner.Text()
 		numbers := arrayToInt(re.FindAllString(line, -1))
 		stones = append(stones, numbers...)
 	}
-
-	return stones
 }
