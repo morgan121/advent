@@ -12,15 +12,15 @@ import (
 
 type Block struct {
 	value    int
-	length   int
 	startIdx int
+	length   int
 }
 
 var (
-	blockLength []int
-	gapLength   []int
-	blocks      []Block
-	gaps        []Block
+	blockLengths []int
+	gapLengths   []int
+	blocks       []Block
+	gaps         []Block
 )
 
 func main() {
@@ -34,22 +34,20 @@ func main() {
 	file, _ := os.Open(fmt.Sprintf("2024/09/%s.txt", mode))
 	defer file.Close()
 
-	blockLength, gapLength = parse(file)
+	blockLengths, gapLengths = parse(file)
 
 	switch part {
 	case "1":
-		calculatePart1()
+		calculate(condense(translate(blockLengths, gapLengths)))
 	case "2":
-		calculatePart2() // 8317688930597 is too high
+		calculate(condenseByBlock(translate(blockLengths, gapLengths))) // 8317688930597 is too high
 	}
-
 }
 
-func calculatePart1() {
-	disc := condense(translate(blockLength, gapLength))
+func calculate(input []int) {
 	total := 0
 
-	for i, value := range disc {
+	for i, value := range input {
 		if value != -1 {
 			total += value * i
 		}
@@ -58,38 +56,28 @@ func calculatePart1() {
 	fmt.Println(total)
 }
 
-func calculatePart2() {
-	disc := condenseByBlock(translate(blockLength, gapLength))
-	total := 0
-
-	for i, value := range disc {
-		if value != -1 {
-			total += value * i
-		}
-	}
-
-	fmt.Println(total)
-}
-
-func translate(blockLength []int, gapLength []int) []int {
-	var translated []int
+func translate(blockLengths []int, gapLengths []int) []int {
+	var disc []int
 
 	blocks = make([]Block, 0)
 	gaps = make([]Block, 0)
 
-	initialBlock := makeBlock(0, blockLength[0])
-	translated = append(translated, initialBlock...)
+	initialBlock := makeBlock(0, blockLengths[0])
+	disc = append(disc, initialBlock...)
 	blocks = append(blocks, Block{length: len(initialBlock), value: 0, startIdx: 0})
-	for i := 1; i < len(blockLength); i++ {
-		gap := makeBlock(-1, gapLength[i-1])
-		block := makeBlock(i, blockLength[i])
-		gaps = append(gaps, Block{length: gapLength[i-1], value: -1, startIdx: len(translated)})
-		translated = append(translated, gap...)
-		blocks = append(blocks, Block{length: blockLength[i], value: i, startIdx: len(translated)})
-		translated = append(translated, block...)
+
+	for i := 1; i < len(blockLengths); i++ {
+		gap := makeBlock(-1, gapLengths[i-1])
+		block := makeBlock(i, blockLengths[i])
+
+		gaps = append(gaps, Block{value: -1, startIdx: len(disc), length: gapLengths[i-1]})
+		disc = append(disc, gap...)
+
+		blocks = append(blocks, Block{value: i, startIdx: len(disc), length: blockLengths[i]})
+		disc = append(disc, block...)
 	}
 
-	return translated
+	return disc
 }
 
 func condense(disc []int) []int {
@@ -107,28 +95,18 @@ func condense(disc []int) []int {
 	return disc
 }
 
-func lastNonZeroIndex(input []int) int {
-	for i := len(input) - 1; i >= 0; i-- {
-		if input[i] != -1 {
-			return i
-		}
-	}
-
-	return -1
-}
-
 func condenseByBlock(disc []int) []int {
 	for i := len(blocks) - 1; i >= 0; i-- {
 
 		block := blocks[i]
-		firstAppropriateGapIdx := slices.IndexFunc(gaps, func(gap Block) bool {
+		firstAvailableGapIdx := slices.IndexFunc(gaps, func(gap Block) bool {
 			return gap.length >= block.length
 		})
 
-		if firstAppropriateGapIdx == -1 {
+		if firstAvailableGapIdx == -1 {
 			continue
 		} else {
-			gap := gaps[firstAppropriateGapIdx]
+			gap := gaps[firstAvailableGapIdx]
 
 			for g := gap.startIdx; g < gap.startIdx+block.length; g++ {
 				disc[g] = block.value
@@ -140,11 +118,21 @@ func condenseByBlock(disc []int) []int {
 
 			gap.startIdx += block.length
 			gap.length -= block.length
-			gaps[firstAppropriateGapIdx] = gap
+			gaps[firstAvailableGapIdx] = gap
 		}
 	}
 
 	return disc
+}
+
+func lastNonZeroIndex(input []int) int {
+	for i := len(input) - 1; i >= 0; i-- {
+		if input[i] != -1 {
+			return i
+		}
+	}
+
+	return -1
 }
 
 func makeBlock(value int, length int) []int {
@@ -154,29 +142,6 @@ func makeBlock(value int, length int) []int {
 	}
 
 	return block
-}
-
-func parse(file *os.File) ([]int, []int) {
-	scanner := bufio.NewScanner(file)
-	re := regexp.MustCompile(`\d`)
-
-	var blockLength []int
-	var gapLength []int
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		numbers := arrayToInt(re.FindAllString(line, -1))
-
-		for i, char := range numbers {
-			if i%2 == 0 {
-				blockLength = append(blockLength, char)
-			} else {
-				gapLength = append(gapLength, char)
-			}
-		}
-	}
-
-	return blockLength, gapLength
 }
 
 func arrayToInt(s []string) []int {
@@ -196,4 +161,27 @@ func toInt(s string) int {
 	}
 
 	return n
+}
+
+func parse(file *os.File) ([]int, []int) {
+	scanner := bufio.NewScanner(file)
+	re := regexp.MustCompile(`\d`)
+
+	var blockLengths []int
+	var gapLengths []int
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		numbers := arrayToInt(re.FindAllString(line, -1))
+
+		for i, char := range numbers {
+			if i%2 == 0 {
+				blockLengths = append(blockLengths, char)
+			} else {
+				gapLengths = append(gapLengths, char)
+			}
+		}
+	}
+
+	return blockLengths, gapLengths
 }
