@@ -97,7 +97,6 @@ func condense(disc []int) []int {
 
 func condenseByBlock(disc []int) []int {
 	for i := len(blocks) - 1; i >= 0; i-- {
-
 		block := blocks[i]
 		firstAvailableGapIdx := slices.IndexFunc(gaps, func(gap Block) bool {
 			return gap.length >= block.length
