@@ -38,9 +38,42 @@ func main() {
 
 	switch part {
 	case "1":
-		fmt.Println(games)
+		total := 0
+		for _, game := range games {
+			pushA, pushB := calculatePart1(game.buttonA.x, game.buttonA.y, game.buttonB.x, game.buttonB.y, game.prize.x, game.prize.y)
+			total += pushA*3 + pushB
+		}
+		fmt.Println(total)
 	case "2":
+		total := 0
+		for _, game := range games {
+			pushA, pushB := calculatePart2(game.buttonA.x, game.buttonA.y, game.buttonB.x, game.buttonB.y, game.prize.x+10000000000000, game.prize.y+10000000000000)
+			total += pushA*3 + pushB
+		}
+		fmt.Println(total)
 	}
+}
+
+func calculatePart1(a int, b int, c int, d int, x int, y int) (int, int) {
+	A := ((d * x) + (-c * y)) / (a*d - b*c)
+	B := ((-b * x) + (a * y)) / (a*d - b*c)
+
+	if A > 100 || B > 100 || A*a+B*c != x || A*b+B*d != y {
+		return 0, 0
+	}
+
+	return A, B
+}
+
+func calculatePart2(a int, b int, c int, d int, x int, y int) (int, int) {
+	A := ((d * x) + (-c * y)) / (a*d - b*c)
+	B := ((-b * x) + (a * y)) / (a*d - b*c)
+
+	if A*a+B*c != x || A*b+B*d != y {
+		return 0, 0
+	}
+
+	return A, B
 }
 
 func arrayToInt(s []string) []int {
@@ -75,8 +108,6 @@ func parse(file *os.File) []Game {
 		coords := arrayToInt(re.FindAllString(line, -1))
 
 		if len(coords) == 0 {
-			games = append(games, game)
-			game = Game{}
 			step = 0
 		} else {
 			switch step {
@@ -89,6 +120,7 @@ func parse(file *os.File) []Game {
 			case 2:
 				game.prize.x = coords[0]
 				game.prize.y = coords[1]
+				games = append(games, game)
 			}
 
 			step++
