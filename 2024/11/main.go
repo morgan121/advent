@@ -66,55 +66,6 @@ func simulateStones(initialStones []int, blinks int) int {
 	return totalStones
 }
 
-// func processStones(blinkCount int) int {
-// 	total := 0
-
-// 	for _, stone := range stones {
-// 		if stoneCount[stone] == 0 {
-// 			transformStone(stone, stone, 0, blinkCount)
-// 		}
-// 		total += stoneCount[stone]
-// 	}
-
-// 	return total
-// }
-
-// func transformStone(stone int, initialStone int, iterations int, maxIterations int) {
-// 	if iterations == maxIterations {
-// 		return
-// 	}
-
-// 	if _, exists := converter[stone]; !exists {
-// 		converter[stone] = convertStone(stone)
-// 	}
-
-// 	newStones := converter[stone]
-// 	if len(newStones) == 2 {
-// 		stoneCount[initialStone]++
-// 	}
-
-// 	for _, stone := range newStones {
-// 		transformStone(stone, initialStone, iterations+1, maxIterations)
-// 	}
-// }
-
-// func convertStone(stone int) []int {
-// 	if stone == 0 {
-// 		return []int{1}
-// 	}
-
-// 	strStone := strconv.Itoa(stone)
-// 	if len(strStone)%2 == 0 {
-// 		halfLen := len(strStone) / 2
-// 		return []int{
-// 			toInt(strStone[:halfLen]),
-// 			toInt(strStone[halfLen:]),
-// 		}
-// 	}
-
-// 	return []int{stone * 2024}
-// }
-
 func arrayToInt(s []string) []int {
 	var intArray []int
 
