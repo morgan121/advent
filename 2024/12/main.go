@@ -37,15 +37,19 @@ func main() {
 	case "1":
 		total := 0
 		for _, point := range points {
-			total += handlePoint(point)
+			total += handlePointPart1(point)
 		}
-
 		fmt.Println(total)
 	case "2":
+		total := 0
+		for _, point := range points {
+			total += handlePointPart2(point)
+		}
+		fmt.Println(total)
 	}
 }
 
-func handlePoint(point Point) int {
+func handlePointPart1(point Point) int {
 	if visited[point] {
 		return 0
 	}
@@ -60,23 +64,19 @@ func handlePoint(point Point) int {
 	return area * perimeter
 }
 
-func findRegion(startPoint Point, region []Point) []Point {
-	visited[startPoint] = true
-
-	neighbours := make([]Point, 0)
-	neighbours = append(neighbours, Point{x: startPoint.x, y: startPoint.y - 1})
-	neighbours = append(neighbours, Point{x: startPoint.x, y: startPoint.y + 1})
-	neighbours = append(neighbours, Point{x: startPoint.x - 1, y: startPoint.y})
-	neighbours = append(neighbours, Point{x: startPoint.x + 1, y: startPoint.y})
-
-	for _, neighbour := range neighbours {
-		if grid[neighbour] == grid[startPoint] && !visited[neighbour] {
-			region = append(region, neighbour)
-			region = findRegion(neighbour, region)
-		}
+func handlePointPart2(point Point) int {
+	if visited[point] {
+		return 0
 	}
 
-	return region
+	region := make([]Point, 0)
+	region = append(region, point)
+	region = findRegion(point, region)
+
+	area := len(region)
+	sides := calcSides(region)
+
+	return area * sides
 }
 
 func calcPerimeter(region []Point) int {
@@ -84,12 +84,7 @@ func calcPerimeter(region []Point) int {
 
 	for _, point := range region {
 		maxPerimeter := 4
-
-		potentialNeighbours := make([]Point, 0)
-		potentialNeighbours = append(potentialNeighbours, Point{x: point.x, y: point.y - 1})
-		potentialNeighbours = append(potentialNeighbours, Point{x: point.x, y: point.y + 1})
-		potentialNeighbours = append(potentialNeighbours, Point{x: point.x - 1, y: point.y})
-		potentialNeighbours = append(potentialNeighbours, Point{x: point.x + 1, y: point.y})
+		potentialNeighbours := getNeighbours(point, "nsew")
 
 		for _, neighbour := range potentialNeighbours {
 			if grid[neighbour] == grid[point] {
@@ -101,6 +96,84 @@ func calcPerimeter(region []Point) int {
 	}
 
 	return perimeter
+}
+
+func calcSides(region []Point) int {
+	corners := 0
+
+	directions := []string{"nw", "se", "sw", "ne"}
+
+	for _, point := range region {
+		for _, direction := range directions {
+			neighbours := getNeighbours(point, direction)
+
+			if grid[neighbours[0]] == grid[point] && grid[neighbours[1]] == grid[point] {
+				if grid[getDiagonal(point, direction)] != grid[point] {
+					corners++
+				}
+			} else if grid[neighbours[0]] != grid[point] && grid[neighbours[1]] != grid[point] {
+				corners++
+			}
+		}
+	}
+
+	return corners
+}
+
+func getDiagonal(point Point, direction string) Point {
+	switch direction {
+	case "nw":
+		return Point{x: point.x - 1, y: point.y - 1}
+	case "se":
+		return Point{x: point.x + 1, y: point.y + 1}
+	case "sw":
+		return Point{x: point.x - 1, y: point.y + 1}
+	case "ne":
+		return Point{x: point.x + 1, y: point.y - 1}
+	}
+
+	return Point{}
+}
+
+func findRegion(startPoint Point, region []Point) []Point {
+	visited[startPoint] = true
+
+	neighbours := getNeighbours(startPoint, "nsew")
+
+	for _, neighbour := range neighbours {
+		if grid[neighbour] == grid[startPoint] && !visited[neighbour] {
+			region = append(region, neighbour)
+			region = findRegion(neighbour, region)
+		}
+	}
+
+	return region
+}
+
+func getNeighbours(point Point, mode string) []Point {
+	neighbours := make([]Point, 0)
+
+	switch mode {
+	case "nsew":
+		neighbours = append(neighbours, Point{x: point.x, y: point.y - 1}) // North
+		neighbours = append(neighbours, Point{x: point.x, y: point.y + 1}) // South
+		neighbours = append(neighbours, Point{x: point.x + 1, y: point.y}) // East
+		neighbours = append(neighbours, Point{x: point.x - 1, y: point.y}) // West
+	case "ne":
+		neighbours = append(neighbours, Point{x: point.x, y: point.y - 1}) // North
+		neighbours = append(neighbours, Point{x: point.x + 1, y: point.y}) // East
+	case "se":
+		neighbours = append(neighbours, Point{x: point.x, y: point.y + 1}) // South
+		neighbours = append(neighbours, Point{x: point.x + 1, y: point.y}) // East
+	case "sw":
+		neighbours = append(neighbours, Point{x: point.x, y: point.y + 1}) // South
+		neighbours = append(neighbours, Point{x: point.x - 1, y: point.y}) // West
+	case "nw":
+		neighbours = append(neighbours, Point{x: point.x, y: point.y - 1}) // North
+		neighbours = append(neighbours, Point{x: point.x - 1, y: point.y}) // West
+	}
+
+	return neighbours
 }
 
 func parse(file *os.File) (Grid, VisitedGrid) {
