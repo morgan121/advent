@@ -68,6 +68,7 @@ func calculatePart2(a int, b int, c int, d int, x int, y int) int {
 	return A*3 + B
 }
 
+// matrix multiplication: https://www.mathsisfun.com/algebra/systems-linear-equations-matrices.html
 func calculate(a int, b int, c int, d int, x int, y int) (int, int) {
 	A := ((d * x) + (-c * y)) / (a*d - b*c)
 	B := ((-b * x) + (a * y)) / (a*d - b*c)
