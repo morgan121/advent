@@ -36,36 +36,39 @@ func main() {
 
 	games := parse(file)
 
+	total := 0
+
 	switch part {
 	case "1":
-		total := 0
 		for _, game := range games {
-			pushA, pushB := calculatePart1(game.buttonA.x, game.buttonA.y, game.buttonB.x, game.buttonB.y, game.prize.x, game.prize.y)
-			total += pushA*3 + pushB
+			total += calculatePart1(game.buttonA.x, game.buttonA.y, game.buttonB.x, game.buttonB.y, game.prize.x, game.prize.y)
 		}
-		fmt.Println(total)
 	case "2":
-		total := 0
 		for _, game := range games {
-			pushA, pushB := calculatePart2(game.buttonA.x, game.buttonA.y, game.buttonB.x, game.buttonB.y, game.prize.x+10000000000000, game.prize.y+10000000000000)
-			total += pushA*3 + pushB
+			total += calculatePart2(game.buttonA.x, game.buttonA.y, game.buttonB.x, game.buttonB.y, game.prize.x, game.prize.y)
 		}
-		fmt.Println(total)
-	}
-}
-
-func calculatePart1(a int, b int, c int, d int, x int, y int) (int, int) {
-	A := ((d * x) + (-c * y)) / (a*d - b*c)
-	B := ((-b * x) + (a * y)) / (a*d - b*c)
-
-	if A > 100 || B > 100 || A*a+B*c != x || A*b+B*d != y {
-		return 0, 0
 	}
 
-	return A, B
+	fmt.Println(total)
 }
 
-func calculatePart2(a int, b int, c int, d int, x int, y int) (int, int) {
+func calculatePart1(a int, b int, c int, d int, x int, y int) int {
+	A, B := calculate(a, b, c, d, x, y)
+
+	if A > 100 || B > 100 {
+		return 0
+	}
+
+	return A*3 + B
+}
+
+func calculatePart2(a int, b int, c int, d int, x int, y int) int {
+	A, B := calculate(a, b, c, d, x+10000000000000, y+10000000000000)
+
+	return A*3 + B
+}
+
+func calculate(a int, b int, c int, d int, x int, y int) (int, int) {
 	A := ((d * x) + (-c * y)) / (a*d - b*c)
 	B := ((-b * x) + (a * y)) / (a*d - b*c)
 
