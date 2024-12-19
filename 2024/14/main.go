@@ -35,10 +35,59 @@ func main() {
 
 	switch part {
 	case "1":
+		for i := 0; i < 100; i++ {
+			robots = step(robots, xMax, yMax)
+		}
+		calcQuadrants(robots, xMax, yMax)
 	case "2":
 	}
+}
 
-	fmt.Println(xMax, yMax, robots)
+func calcQuadrants(robots []Robot, xMax int, yMax int) {
+	midX, midY := xMax/2, yMax/2
+
+	topRightQuadrant := 0
+	topLeftQuadrant := 0
+	bottomRightQuadrant := 0
+	bottomLeftQuadrant := 0
+
+	for _, robot := range robots {
+		if robot.xPos > midX && robot.yPos > midY {
+			topRightQuadrant++
+		} else if robot.xPos < midX && robot.yPos > midY {
+			topLeftQuadrant++
+		} else if robot.xPos > midX && robot.yPos < midY {
+			bottomRightQuadrant++
+		} else if robot.xPos < midX && robot.yPos < midY {
+			bottomLeftQuadrant++
+		}
+	}
+
+	fmt.Println(topRightQuadrant * topLeftQuadrant * bottomRightQuadrant * bottomLeftQuadrant)
+}
+
+func step(robots []Robot, xMax int, yMax int) []Robot {
+	for i, robot := range robots {
+		robot.xPos += robot.xVelocity
+		robot.yPos += robot.yVelocity
+
+		if robot.xPos < 0 {
+			robot.xPos += xMax
+		}
+		if robot.xPos >= xMax {
+			robot.xPos -= xMax
+		}
+		if robot.yPos < 0 {
+			robot.yPos += yMax
+		}
+		if robot.yPos >= yMax {
+			robot.yPos -= yMax
+		}
+
+		robots[i] = robot
+	}
+
+	return robots
 }
 
 func arrayToInt(s []string) []int {
@@ -62,7 +111,7 @@ func toInt(s string) int {
 
 func parse(file *os.File) []Robot {
 	scanner := bufio.NewScanner(file)
-	re := regexp.MustCompile(`\d+`)
+	re := regexp.MustCompile(`-?\d+`)
 
 	robots := make([]Robot, 0)
 	robot := Robot{}
