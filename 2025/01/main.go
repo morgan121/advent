@@ -36,12 +36,12 @@ func main() {
 		direction := line[0:1]
 		distance := toInt(re.FindAllString(line, -1)[0])
 
-		part2Total += distance / 100
 		dialValue = rotate(
 			dialValue,
 			direction,
 			distance%100,
 		)
+		part2Total += distance / 100
 	}
 
 	switch parts {
