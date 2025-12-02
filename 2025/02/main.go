@@ -29,23 +29,15 @@ func main() {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		rawRanges := strings.Split(line, ",")
+		ranges := strings.Split(line, ",")
 
-		for _, rawRange := range rawRanges {
-			startVal := toInt(strings.Split(rawRange, "-")[0])
-			endVal := toInt(strings.Split(rawRange, "-")[1])
+		for _, r := range ranges {
+			start := toInt(strings.Split(r, "-")[0])
+			end := toInt(strings.Split(r, "-")[1])
 
-			for value := startVal; value <= endVal; value++ {
-				if part == "1" {
-					if isInvalidPart1(strconv.Itoa(value)) {
-						invalidSum += value
-					}
-				}
-
-				if part == "2" {
-					if isInvalidPart2(strconv.Itoa(value)) {
-						invalidSum += value
-					}
+			for v := start; v <= end; v++ {
+				if isInvalid(strconv.Itoa(v), part) {
+					invalidSum += v
 				}
 			}
 		}
@@ -54,22 +46,23 @@ func main() {
 	fmt.Println(invalidSum)
 }
 
-func isInvalidPart1(value string) bool {
-	n := len(value)
-	if n%2 != 0 {
-		return false
-	}
-	half := n / 2
-	return value[:half] == value[half:]
-}
+func isInvalid(v string, part string) bool {
+	n := len(v)
 
-func isInvalidPart2(value string) bool {
-	n := len(value)
-	if n <= 1 {
-		return false
+	switch part {
+	case "1":
+		if n%2 != 0 {
+			return false
+		}
+
+		half := n / 2
+		return v[:half] == v[half:]
+	case "2":
+		ss := (v + v)[1 : 2*n-1]
+		return strings.Contains(ss, v)
 	}
-	ss := (value + value)[1 : 2*n-1]
-	return strings.Contains(ss, value)
+
+	return false
 }
 
 func toInt(s string) int {
