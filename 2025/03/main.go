@@ -7,22 +7,14 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"runtime"
 	"slices"
 	"strconv"
 )
 
 func main() {
-	if len(os.Args) < 3 {
-		log.Fatal("Usage (from advent root): go run 2025/01/main.go <part> (1 or 2) <mode> (real or test)")
-	}
+	file, part := setup()
 
-	part := os.Args[1]
-	mode := os.Args[2]
-
-	file, err := os.Open(fmt.Sprintf("2025/03/%s.txt", mode))
-	if err != nil {
-		log.Fatal(err)
-	}
 	defer file.Close()
 
 	re := regexp.MustCompile(`[0-9]`)
@@ -49,8 +41,8 @@ func main() {
 			start += ind + 1
 			total += val * int(math.Pow(10, float64(i)))
 		}
-
 	}
+
 	fmt.Println(total)
 }
 
@@ -67,4 +59,24 @@ func toInt(s string) int {
 	}
 
 	return n
+}
+
+func setup() (*os.File, string) {
+	if len(os.Args) < 3 {
+		log.Fatal("Usage (from advent root): go run 2025/01/main.go <part> (1 or 2) <mode> (real or test)")
+	}
+
+	_, filename, _, _ := runtime.Caller(0)
+	part := os.Args[1]
+	mode := os.Args[2]
+
+	re := regexp.MustCompile(`[0-9]+`)
+	paths := re.FindAllString(filename, -1)
+
+	file, err := os.Open(fmt.Sprintf("%s/%s/%s.txt", paths[0], paths[1], mode))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return file, part
 }
