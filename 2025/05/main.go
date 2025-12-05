@@ -39,9 +39,12 @@ func main() {
 		}
 	}
 
+	freshDates = consolidate(freshDates)
+
+	total := 0
+
 	switch part {
 	case "1":
-		total := 0
 		for _, date := range dates {
 			fresh, _ := between(date, freshDates)
 			if fresh {
@@ -50,29 +53,32 @@ func main() {
 		}
 		fmt.Println(total)
 	case "2":
-		sort.Slice(freshDates, func(i, j int) bool {
-			return freshDates[i].start < freshDates[j].start
-		})
-		incorporatedIndexes := make([]int, 0)
-		for i, fd := range freshDates {
-			between, index := between(fd.start, freshDates)
-			if between && index != i {
-				incorporatedIndexes = append(incorporatedIndexes, i)
-				freshDates[index].end = max(freshDates[index].end, fd.end)
-			}
-		}
-		sort.Sort(sort.Reverse(sort.IntSlice(incorporatedIndexes)))
-		for _, i := range incorporatedIndexes {
-			freshDates = append(freshDates[:i], freshDates[i+1:]...)
-		}
-
-		total := 0
 		for _, fd := range freshDates {
 			total += fd.end - fd.start + 1
 		}
 		fmt.Println(total)
 	}
 
+}
+
+func consolidate(ranges []Range) []Range {
+	sort.Slice(ranges, func(i, j int) bool {
+		return ranges[i].start < ranges[j].start
+	})
+	incorporatedIndexes := make([]int, 0)
+	for i, fd := range ranges {
+		between, index := between(fd.start, ranges)
+		if between && index != i {
+			incorporatedIndexes = append(incorporatedIndexes, i)
+			ranges[index].end = max(ranges[index].end, fd.end)
+		}
+	}
+	sort.Sort(sort.Reverse(sort.IntSlice(incorporatedIndexes)))
+	for _, i := range incorporatedIndexes {
+		ranges = append(ranges[:i], ranges[i+1:]...)
+	}
+
+	return ranges
 }
 
 func fullyBetween(r Range, rs []Range) bool {
